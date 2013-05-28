@@ -1,8 +1,8 @@
 package com.gmail.ikeike443;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.Proc;
 import hudson.model.BuildListener;
 import hudson.model.ParameterValue;
 import hudson.model.Result;
@@ -13,7 +13,6 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -156,8 +155,8 @@ public class PlayAutoTestBuilder extends Builder{
 				String cmd = playpath + " " + cmds[0] +" \""+workDir.toString()+"\" "+(cmds.length>=2? cmds[1]:"");
 
 				listener.getLogger().println("Executing " + cmd);
-				Proc proc = launcher.launch(cmd, new String[0],listener.getLogger(),workDir);
-				int exitcode = proc.join();
+				EnvVars envVars = build.getEnvironment(listener);
+				int exitcode = launcher.launch().cmdAsSingleString(cmd).envs(envVars).stdout(listener.getLogger()).pwd(workDir).join();
 
 				exitcodes.put(play_cmd, (exitcode==0? "Done":"Fail"));
 
